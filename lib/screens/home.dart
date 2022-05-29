@@ -415,26 +415,33 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               TextButton(
                   child: const Text("Save",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      )),
                   onPressed: () {
-                    Navigator.pop(context);
-                    if (processing == false) {
-                      _handle(_name.text.toUpperCase(), _id.text.toUpperCase());
+                    if (_name.text.isEmpty || _id.text.isEmpty) {
                     } else {
-                      alert = AwesomeDialog(
-                          context: context,
-                          dialogType: DialogType.INFO,
-                          title: 'Processing images...',
-                          dismissOnBackKeyPress: false,
-                          dismissOnTouchOutside: false);
-                      alert!.show();
-                      while (processing == true) {}
-                      alert!.dismiss();
-                      _handle(_name.text.toUpperCase(), _id.text.toUpperCase());
+                      Navigator.pop(context);
+                      if (processing == false) {
+                        _handle(
+                            _name.text.toUpperCase(), _id.text.toUpperCase());
+                      } else {
+                        alert = AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.INFO,
+                            title: 'Processing images...',
+                            dismissOnBackKeyPress: false,
+                            dismissOnTouchOutside: false);
+                        alert!.show();
+                        while (processing == true) {}
+                        alert!.dismiss();
+                        _handle(
+                            _name.text.toUpperCase(), _id.text.toUpperCase());
+                      }
+                      _name.clear();
+                      _id.clear();
                     }
-                    _name.clear();
-                    _id.clear();
                   }),
             ],
           );
