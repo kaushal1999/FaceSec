@@ -4,6 +4,10 @@ An Android app for CRIMINAL DETECTION using face recognition developed using Flu
 2. FaceNet model built and trained using TensorFlow lite is used for face recognition.
 
 
+
+[Download Apk](https://drive.google.com/file/d/1SGS9GsTxdVnakx-CgMu_YjF9BgT5xuet/view?usp=sharing)
+
+
 Setup guide:
 
 (a) Prerequisites:  
