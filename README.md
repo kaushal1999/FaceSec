@@ -1,4 +1,4 @@
-An Android app for CRIMINAL DETECTION using face recognition developed using Flutter SDK.
+An Flutter app for CRIMINAL DETECTION using face recognition developed using Flutter SDK.
 
 1. google_mlkit_face_detection plugin used for face detection.
 2. FaceNet model built and trained using TensorFlow lite is used for face recognition.
