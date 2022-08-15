@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quiver/collection.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
-import '../faceModule/FacePainter.dart';
+import '../faceModule/face_painter.dart';
 import '../faceModule/utils.dart';
 
 class FaceRecognitionView extends StatefulWidget {

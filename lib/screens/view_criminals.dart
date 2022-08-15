@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import '../faceModule/utils.dart';
-import '../widgets/itemWidget.dart';
+import '../widgets/criminal_tile.dart';
 
 class ViewCriminals extends StatefulWidget {
- final bool results;
+  final bool results;
   final Set tempIds;
   const ViewCriminals({Key? key, required this.results, required this.tempIds})
       : super(key: key);
