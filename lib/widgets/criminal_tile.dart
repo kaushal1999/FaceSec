@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-class ItemWidget extends StatelessWidget {
+class CriminalTile extends StatelessWidget {
   final String name;
   final String id;
   final File file;
-  const ItemWidget(
+  const CriminalTile(
       {Key? key, required this.name, required this.id, required this.file})
       : super(key: key);
 

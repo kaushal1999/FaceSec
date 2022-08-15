@@ -31,10 +31,8 @@ class _FaceRecognitionViewState extends State<FaceRecognitionView> {
   bool _isDetecting = false;
   double threshold = 1.0;
   dynamic _scanResults;
-  String _predRes = '';
   bool isStream = true;
   Directory? tempDir;
-  List? e1;
   bool loading = true;
   var direction = CameraLensDirection.front;
 
@@ -118,29 +116,6 @@ class _FaceRecognitionViewState extends State<FaceRecognitionView> {
     );
   }
 
-  Widget _buildResults() {
-    if (_scanResults == null ||
-        _camera == null ||
-        !_camera!.value.isInitialized) {
-      return const SizedBox();
-    }
-    CustomPainter painter;
-
-    final Size imageSize = Size(
-      _camera!.value.previewSize!.height,
-      _camera!.value.previewSize!.width,
-    );
-    painter = FaceDetectorPainter(imageSize, _scanResults, direction);
-    bool check = _scanResults!.keys.any((e) => (e != "UNKNOWN"));
-    if (check) {
-      player.play('alarm.mp3',
-          mode: PlayerMode.LOW_LATENCY, isNotification: true);
-    }
-    return CustomPaint(
-      painter: painter,
-    );
-  }
-
   void initCamera() async {
     CameraDescription description = await getCamera(direction);
     _camera = CameraController(
@@ -178,7 +153,7 @@ class _FaceRecognitionViewState extends State<FaceRecognitionView> {
           imglib.Image croppedImage = imglib.copyCrop(
               convertedImage, x.round(), y.round(), w.round(), h.round());
           croppedImage = imglib.copyResizeCropSquare(croppedImage, 112);
-          res = recog(croppedImage);
+          res = recogFaces(croppedImage);
           finalResult.add(res, _face);
         }
         _scanResults = finalResult;
@@ -188,33 +163,42 @@ class _FaceRecognitionViewState extends State<FaceRecognitionView> {
     });
   }
 
-  String recog(imglib.Image img) {
+  String recogFaces(imglib.Image img) {
     List input = imageToByteListFloat32(img, 112, 128, 128);
     input = input.reshape([1, 112, 112, 3]);
     List output = List.filled(1 * 192, null, growable: false).reshape([1, 192]);
     interpreter!.run(input, output);
     output = output.reshape([192]);
-    e1 = List.from(output);
-    return compare(e1!).toUpperCase();
-  }
-
-  String compare(List currEmb) {
-    double minDist = 999;
-    double currDist = 0.0;
-    _predRes = "unknown";
-    for (String id in data.keys) {
-      for (List list in data[id][1]) {
-        currDist = euclideanDistance(list, currEmb);
-        if (currDist <= threshold && currDist < minDist) {
-          minDist = currDist;
-          _predRes = data[id][0];
-        }
-      }
-    }
-    return _predRes;
+    List e1 = List.from(output);
+    String id = compareFaces(e1, data);
+    if (id == "unknown") return "UNKNOWN";
+    return data[id][0].toUppercase();
   }
 
   Future<void> toggleCamera() async {
     initCamera();
+  }
+
+  Widget _buildResults() {
+    if (_scanResults == null ||
+        _camera == null ||
+        !_camera!.value.isInitialized) {
+      return const SizedBox();
+    }
+    CustomPainter painter;
+
+    final Size imageSize = Size(
+      _camera!.value.previewSize!.height,
+      _camera!.value.previewSize!.width,
+    );
+    painter = FaceDetectorPainter(imageSize, _scanResults, direction);
+    bool check = _scanResults!.keys.any((e) => (e != "UNKNOWN"));
+    if (check) {
+      player.play('alarm.mp3',
+          mode: PlayerMode.LOW_LATENCY, isNotification: true);
+    }
+    return CustomPaint(
+      painter: painter,
+    );
   }
 }

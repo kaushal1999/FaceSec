@@ -110,3 +110,20 @@ Future<File> getImageFile(String id) async {
   File imageFile = File(_embPath);
   return imageFile;
 }
+
+String compareFaces(List currEmb, dynamic data) {
+  double threshold = 1.0;
+  double minDist = 999;
+  double currDist = 0.0;
+  String res = "unknown";
+  for (String id in data.keys) {
+    for (List list in data[id][1]) {
+      currDist = euclideanDistance(list, currEmb);
+      if (currDist <= threshold && currDist < minDist) {
+        minDist = currDist;
+        res = id;
+      }
+    }
+  }
+  return res;
+}

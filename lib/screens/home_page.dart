@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:face_recognition/faceModule/utils.dart';
-import 'package:face_recognition/screens/detection.dart';
+import 'package:face_recognition/screens/face_recognition_view.dart';
 import 'package:face_recognition/screens/view_criminals.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -12,14 +12,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import '../faceModule/model.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
   final List actions = [
     "Add Criminal's Images",
     "Detect Criminals",
@@ -40,8 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool processing = false;
   bool localImageTaken = false;
   imglib.Image? localImage;
-  double threshold = 1.0;
-
+  String description =
+      "You may select more than one(slightly different images) for better recognition accuracy. Before Proceeding, make sure that images of the criminal are available in your phone storage. There should be no faces except that of criminal in selected images.";
   @override
   void dispose() {
     interpreter?.close();
@@ -120,13 +120,12 @@ class _MyHomePageState extends State<MyHomePage> {
           dialogType: DialogType.INFO,
           title: "Important",
           descTextStyle: const TextStyle(fontSize: 17),
-          desc:
-              "You may select more than one(slightly different images) for better recognition accuracy. Before Proceeding, make sure that images of the criminal are available in your phone storage. There should be no faces except that of criminal in selected images.",
+          desc: description,
           btnCancelText: 'Go back',
           btnCancelOnPress: () {},
           btnOkText: 'Proceed',
           btnOkOnPress: () {
-            selectImages(0);
+            selectImages(false);
           }).show();
     } else if (index == 1) {
       AwesomeDialog(
@@ -136,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: 'Select Mode',
           dialogType: DialogType.QUESTION,
           btnCancelOnPress: () {
-            selectImages(1);
+            selectImages(true);
           },
           btnOkOnPress: () {
             _startLiveDetection();
@@ -152,21 +151,21 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void selectImages(int count) async {
+  void selectImages(bool detecting) async {
     var _picker = ImagePicker();
     final List<XFile>? images = await _picker.pickMultiImage();
     if (images == null) {
       return;
     }
-    if (count != 1) {
+    if (detecting != true) {
       showDetailsFilldialogue();
     }
     interpreter = await loadModel();
-    processImages(images, count);
+    processImages(images, detecting);
   }
 
-  processImages(List<XFile> images, int count) async {
-    if (count == 1) {
+  processImages(List<XFile> images, bool detecting) async {
+    if (detecting == true) {
       if (!mounted) return;
       alert = AwesomeDialog(
           context: context,
@@ -187,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       InputImage inputImage = getInputImage1(images[i].path);
       List<Face> result = await faceDetector.processImage(inputImage);
-      if (count != 1) {
+      if (detecting != true) {
         if (result.isEmpty || result.length > 1) {
           continue;
         }
@@ -210,17 +209,17 @@ class _MyHomePageState extends State<MyHomePage> {
         h = (_face.boundingBox.height + 10);
         imglib.Image croppedImage =
             imglib.copyCrop(img!, x.round(), y.round(), w.round(), h.round());
-        if (count != 1) {
+        if (detecting != true) {
           if (localImageTaken == false) {
             localImage = croppedImage;
             localImageTaken = true;
           }
         }
         croppedImage = imglib.copyResizeCropSquare(croppedImage, 112);
-        recog(croppedImage, count);
+        recogniseFaces(croppedImage, detecting);
       }
     }
-    if (count == 1) {
+    if (detecting == true) {
       await Future.delayed(const Duration(seconds: 2));
       alert!.dismiss();
       await Navigator.push(
@@ -238,35 +237,19 @@ class _MyHomePageState extends State<MyHomePage> {
     localImageTaken = false;
   }
 
-  void recog(imglib.Image img, int count) {
+  void recogniseFaces(imglib.Image img, bool detecting) {
     List input = imageToByteListFloat32(img, 112, 128, 128);
     input = input.reshape([1, 112, 112, 3]);
     List output = List.filled(1 * 192, null, growable: false).reshape([1, 192]);
     interpreter!.run(input, output);
     output = output.reshape([192]);
     output = List.from(output);
-    if (count != 1) {
+    if (detecting != true) {
       outputs.add(output);
       return;
     }
-    String? res = compare(output);
-    if (res != null) tempIds.add(res);
-  }
-
-  String? compare(List currEmb) {
-    double minDist = 999;
-    double currDist = 0.0;
-    String? res;
-    for (String id in data.keys) {
-      for (List list in data[id][1]) {
-        currDist = euclideanDistance(list, currEmb);
-        if (currDist <= threshold && currDist < minDist) {
-          minDist = currDist;
-          res = id;
-        }
-      }
-    }
-    return res;
+    String res = compareFaces(output, data);
+    if (res != "unknown") tempIds.add(res);
   }
 
   _startLiveDetection() async {

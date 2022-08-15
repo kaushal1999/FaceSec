@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.amber,
           dialogBackgroundColor: const Color.fromARGB(255, 145, 136, 136)),
-      home: const MySplashPage(),
+      home: const SplashScreen(),
     );
   }
 }

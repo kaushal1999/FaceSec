@@ -2,14 +2,14 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:face_recognition/screens/home_page.dart';
 import 'package:flutter/material.dart';
 
-class MySplashPage extends StatefulWidget {
-  const MySplashPage({Key? key}) : super(key: key);
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<MySplashPage> createState() => _MySplashPageState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _MySplashPageState extends State<MySplashPage> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
@@ -17,7 +17,7 @@ class _MySplashPageState extends State<MySplashPage> {
       backgroundColor: Colors.black,
       splashIconSize: MediaQuery.of(context).size.height,
       centered: false,
-      nextScreen: const MyHomePage(),
+      nextScreen: const HomePage(),
       splashTransition: SplashTransition.fadeTransition,
     );
   }

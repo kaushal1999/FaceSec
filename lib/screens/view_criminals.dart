@@ -142,7 +142,7 @@ class _ViewCriminalsState extends State<ViewCriminals> {
                                             json.encode(data));
                                       });
                                     },
-                              child: ItemWidget(
+                              child: CriminalTile(
                                   name: data[item][0],
                                   id: item,
                                   file: imgFiles[index]));
